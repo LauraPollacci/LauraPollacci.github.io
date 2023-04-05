@@ -7350,7 +7350,7 @@ h1, h2, h3, h4, h5,
   bottom: 0;
   top: 0;
   left: 0;
-  right: 0;
+  right: 5;
   overflow-y: hidden;
   z-index: 1001;
   -moz-transition: all 0.5s ease;
