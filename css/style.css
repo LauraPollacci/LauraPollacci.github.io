@@ -401,7 +401,7 @@ mark,
     content: "\2014 \00A0"; }
 
 .img-fluid {
-  max-width: 80%;
+  max-width: 40%;
   height: auto; }
 
 .img-thumbnail {
@@ -4752,6 +4752,10 @@ button.close {
 .carousel-item-prev {
   display: block; }
 
+.responsive{
+width: 50%;
+}
+
 .carousel-item-next,
 .carousel-item-prev {
   position: absolute;
@@ -7340,7 +7344,7 @@ h1, h2, h3, h4, h5,
   padding-top: 3em;
   padding-bottom: 40px;
   padding-left: 3em;
-  padding-right: 3em;
+  padding-right: 8em;
   width: 22%;
   position: fixed;
   bottom: 0;
