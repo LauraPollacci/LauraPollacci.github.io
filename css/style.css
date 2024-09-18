@@ -1392,7 +1392,7 @@ pre {
 .table-primary,
 .table-primary > th,
 .table-primary > td {
-  background-color: #f5f2f2; }
+  background-color: #d7d7d7; }
 
 .table-hover .table-primary:hover {
   background-color: #d4d4d4; }
