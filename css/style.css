@@ -1395,10 +1395,10 @@ pre {
   background-color: #f5f2f2; }
 
 .table-hover .table-primary:hover {
-  background-color: #c2ecf9; }
+  background-color: #d4d4d4; }
   .table-hover .table-primary:hover > td,
   .table-hover .table-primary:hover > th {
-    background-color: #c2ecf9; }
+    background-color: #d4d4d4; }
 
 .table-secondary,
 .table-secondary > th,
