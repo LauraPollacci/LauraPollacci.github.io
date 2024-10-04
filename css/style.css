@@ -98,7 +98,8 @@ ol,
 ul,
 dl {
   margin-top: 0;
-  margin-bottom: 1rem; }
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;}
 
 ol ol,
 ul ul,
