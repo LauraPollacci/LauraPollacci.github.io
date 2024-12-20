@@ -7647,8 +7647,8 @@ h1, h2, h3, h4, h5,
       visibility: visible; } }
 
 .ftco-intro h1 {
-  font-size: 9.3vw;
-  font-weight: 300;
+  font-size: 5vw;
+  font-weight: 400;
   line-height: 1;
   display: block; }
 
@@ -7829,10 +7829,10 @@ h1, h2, h3, h4, h5,
       .ftco-bread .breadcrumbs span a {
         color: rgba(0, 0, 0, 0.5); }
   .ftco-bread .bread {
-    font-weight: 300;
+    font-weight: 500;
     color: #000000;
     margin-bottom: 0;
-    font-size: 6vw;
+    font-size: 4.5vw;
     display: inline-block;
     position: relative;
     line-height: 1; }
