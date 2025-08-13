@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''
+Estrae le tesi da archivio UniPi filtrate per relatore e genera:
+- assets/theses_pollacci.json
+- assets/theses_pollacci.html (frammento HTML)
+Pensato per essere eseguito da GitHub Actions.
+'''
+import json, time, os, sys
+from urllib.parse import urljoin, urlencode, urlparse
+import requests
+from bs4 import BeautifulSoup
+
+BASE = "https://etd.adm.unipi.it/ETD-db/ETD-search/search_by_advisor"
+ADVISOR = os.getenv("ETD_ADVISOR", "Pollacci")  # cambialo se serve
+RATE_DELAY = float(os.getenv("RATE_DELAY", "0.6"))
+UA = "thesis-list-updater/1.0 (+contact: youremail@example.com)"
+
+session = requests.Session()
+session.headers.update({"User-Agent": UA, "Accept-Language": "it,en;q=0.8"})
+
+def build_url(advisor, extra=None):
+    qs = {"advisor_name": advisor}
+    if extra:
+        qs.update(extra)
+    return f"{BASE}?{urlencode(qs)}"
+
+def fetch(url):
+    r = session.get(url, timeout=30)
+    r.raise_for_status()
+    return BeautifulSoup(r.text, "html.parser"), r.url
+
+def parse_rows(soup):
+    """
+    Cerca una tabella risultati e ne estrae le righe. È scritto in modo 'resiliente'
+    rispetto a piccoli cambi di markup.
+    """
+    rows = []
+    table = soup.find("table")
+    if not table:
+        return rows
+    # salta l'header
+    for tr in table.select("tr")[1:]:
+        tds = tr.find_all("td")
+        if len(tds) < 2:
+            continue
+        author = tds[0].get_text(" ", strip=True)
+        title = tds[1].get_text(" ", strip=True)
+        degree = tds[2].get_text(" ", strip=True) if len(tds) > 2 else ""
+        committee = tds[3].get_text(" ", strip=True) if len(tds) > 3 else ""
+        link = None
+        a = tr.find("a", href=True)
+        if a:
+            link = urljoin(BASE, a["href"])
+        rows.append({
+            "author": author,
+            "title": title,
+            "degree": degree,
+            "committee": committee,
+            "url": link
+        })
+    return rows
+
+def find_next(soup):
+    """
+    Trova il link 'successiva/next' o un link di paginazione compatibile.
+    """
+    # 1) Cerca ancore con testo tipico
+    for a in soup.find_all("a", href=True):
+        label = a.get_text(" ", strip=True).lower()
+        if label in {"successiva", "next", ">", "»", ">>"}:
+            href = a["href"]
+            if "search_by_advisor" in href:
+                return urljoin(BASE, href)
+    # 2) Fallback: qualunque link allo stesso endpoint con parametri di pagina
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if ("search_by_advisor" in href and "advisor_name=" in href
+            and any(p in href for p in ("offset", "start", "from", "page", "first"))):
+            return urljoin(BASE, href)
+    return None
+
+def ensure_dirs():
+    os.makedirs("assets", exist_ok=True)
+
+def render_html(items):
+    out = []
+    out.append("<ul class=\"theses-list\">")
+    for r in items:
+        li = f"<li><strong>{r['author']}</strong> — «{r['title']}»"
+        if r.get("degree"):
+            li += f" <em>({r['degree']})</em>"
+        if r.get("url"):
+            li += f" — <a href=\"{r['url']}\" target=\"_blank\" rel=\"noopener\">scheda</a>"
+        li += "</li>"
+        out.append(li)
+    out.append("</ul>")
+    return "\n".join(out)
+
+def main():
+    ensure_dirs()
+    url = build_url(ADVISOR)
+    seen = set()
+    items = []
+
+    while url and url not in seen:
+        seen.add(url)
+        soup, final_url = fetch(url)
+        items.extend(parse_rows(soup))
+        nxt = find_next(soup)
+        url = nxt
+        time.sleep(RATE_DELAY)
+        if not url:
+            break
+
+    # ordina alfabeticamente per autore (puoi cambiare qui il criterio)
+    items.sort(key=lambda x: (x.get("author","").lower(), x.get("title","").lower()))
+
+    with open("assets/theses_pollacci.json", "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+
+    with open("assets/theses_pollacci.html", "w", encoding="utf-8") as f:
+        f.write(render_html(items))
+
+    print(f"Scritti {len(items)} record.")
+
+if __name__ == "__main__":
+    sys.exit(main())
