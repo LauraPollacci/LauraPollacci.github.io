@@ -36,21 +36,21 @@ jobs:
       - name: Generate publications page
         env:
           BIB_PATH: publications.bib
-          OUT_PATH: publications/index.html
+          OUT_PATH: publications.html            
           PAGE_TITLE: "Publications"
           HIGHLIGHT_AUTHOR: "Laura Pollacci"
           TEMPLATE_PATH: tools/publications_template.html
-        run: |
-          python tools/build_publications.py
+        run: python tools/build_publications.py
 
       - name: Commit & push if changed
         run: |
-          if ! git diff --quiet -- publications/index.html; then
+          if ! git diff --quiet -- publications.html; then   
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add publications/index.html
+            git add publications.html
             git commit -m "chore: update publications [skip ci]"
             git push
           else
             echo "No changes to commit."
           fi
+
