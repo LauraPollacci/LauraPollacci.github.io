@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Publications</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- opzionale: stile del tema -->
+  <style>
+    .publist{margin:1rem 0 2rem 1.25rem}
+    .publist li{margin:.4rem 0}
+    .year{margin-top:1.5rem}
+  </style>
+</head>
+<body>
+  <div class="inner">
+    <h1>Publications</h1>
+    <div id="pubs">Loading…</div>
+  </div>
+
+  <!-- Libreria per BibTeX -->
+  <script src="https://cdn.jsdelivr.net/npm/citation-js@0.6.9"></script>
+  <script>
+  (async () => {
+    try {
+      const res = await fetch('/publications.bib');              // metti il file nella root del sito
+      const bib = await res.text();
+      const cite = new Cite(bib);
+      // ordina per anno decrescente (fallback 0 se assente)
+      const data = cite.data.sort((a,b) => {
+        const ya = (a.issued && a.issued['date-parts'] && a.issued['date-parts'][0][0]) || parseInt(a.year||0,10) || 0;
+        const yb = (b.issued && b.issued['date-parts'] && b.issued['date-parts'][0][0]) || parseInt(b.year||0,10) || 0;
+        return yb - ya;
+      });
+
+      // raggruppa per anno
+      const groups = {};
+      for (const d of data) {
+        const y = ((d.issued && d.issued['date-parts'] && d.issued['date-parts'][0][0]) || d.year || 'n.d.').toString();
+        (groups[y] ||= []).push(d);
+      }
+      const years = Object.keys(groups).sort((a,b)=>parseInt(b)||-1 - (parseInt(a)||-1));
+
+      // renderer minimale (APA di base)
+      const root = document.getElementById('pubs');
+      root.innerHTML = '';
+      for (const y of years) {
+        const h = document.createElement('h3'); h.className='year'; h.textContent = y; root.appendChild(h);
+        const ol = document.createElement('ol'); ol.className='publist'; ol.setAttribute('reversed','');
+        for (const entry of groups[y]) {
+          const html = new Cite(entry).format('bibliography', { format:'html', template:'apa', lang:'en-US' });
+          const li = document.createElement('li');
+          // evidenzia "Laura Pollacci" se presente
+          li.innerHTML = html.replace(/Laura\\s+Pollacci/gi, '<strong>Laura Pollacci</strong>');
+          ol.appendChild(li);
+        }
+        root.appendChild(ol);
+      }
+    } catch (e) {
+      document.getElementById('pubs').textContent = 'Could not load publications.';
+      console.error(e);
+    }
+  })();
+  </script>
+</body>
+</html>
