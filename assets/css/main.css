@@ -176,6 +176,17 @@ h6 {
   h2 {
     font-size: 1.5em; } }
 
+/* Publications */
+.publications .pub-list { margin: 0 0 1.5rem 1.25rem; }
+.publications .pub-list li { margin: .35rem 0; }
+.publications .pub-authors strong { font-weight: 700; }
+.publications .pub-title { font-weight: 600; }
+.publications .pub-links a { text-decoration: none; border-bottom: 1px solid; }
+
+/* Primo anno più vicino al titolo */
+.publications header.main + h3 { margin-top: 1.25rem; }
+
+
 sub {
   font-size: 0.8em;
   position: relative;
