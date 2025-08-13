@@ -108,10 +108,10 @@ def render_page(grouped, years_sorted):
     content = []
     for y in years_sorted:
         content.append(f'<h3>{html.escape(str(y))}</h3>')
-        content.append('<ol class="pub-list" reversed>')
+        content.append('<ul class="pub-list" reversed>')
         for e in grouped[y]:
             content.append(entry_to_html(e))
-        content.append('</ol>')
+        content.append('</ul>')
 
     generated_list = "\n".join(content)
 
