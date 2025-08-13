@@ -6,10 +6,9 @@ from collections import defaultdict
 
 # ===== Config =====
 BIB_PATH = os.environ.get("BIB_PATH", "publications.bib")
-OUT_PATH = os.environ.get("OUT_PATH", "publications/index.html")
+OUT_PATH = os.environ.get("OUT_PATH", "publications.html")  
 TITLE    = os.environ.get("PAGE_TITLE", "Publications")
-HIGHLIGHT_AUTHOR = os.environ.get("HIGHLIGHT_AUTHOR", "Laura Pollacci")  # evidenzia il tuo nome
-TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "tools/publications_template.html")  # facoltativo
+TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "tools/publications_template.html")
 
 # ===== Dipendenze minime (bibtexparser) =====
 try:
