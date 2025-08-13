@@ -38,6 +38,7 @@ def fmt_authors(authors):
     out = []
     for a in authors:
         a_clean = html.escape(a)
+        a_clean = de_latex(a_clean)
         # evidenzia il tuo nome
         if HIGHLIGHT_AUTHOR and HIGHLIGHT_AUTHOR.lower() in a.lower():
             out.append(f"<strong>{a_clean}</strong>")
@@ -89,7 +90,6 @@ def entry_to_html(e):
 
 def de_latex(s: str) -> str:
     if not s: return ""
-    # mapping essenziale; aggiungi altri se servono
     s = s.replace('{\^\i}', 'i')
     return s
 
