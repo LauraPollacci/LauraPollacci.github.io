@@ -7,7 +7,7 @@ from collections import defaultdict
 HIGHLIGHT_AUTHOR = os.environ.get("HIGHLIGHT_AUTHOR", "Laura Pollacci")
 # ===== Config =====
 BIB_PATH = os.environ.get("BIB_PATH", "publications.bib")
-OUT_PATH = os.environ.get("OUT_PATH", "publications.html")  
+OUT_PATH = os.environ.get("OUT_PATH", "publications.html")
 TITLE    = os.environ.get("PAGE_TITLE", "Publications")
 TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "tools/publications_template.html")
 
@@ -21,11 +21,20 @@ except ImportError:
 def normalize_space(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
+def de_latex(s: str) -> str:
+    """Sostituzioni minime da LaTeX -> testo semplice."""
+    if not s:
+        return ""
+    # replace esatto richiesto
+    s = s.replace(r'{\^\i}', 'i')
+    return s
+
 def split_authors(author_field: str):
     # BibTeX: autori separati da ' and '
     parts = [a.strip() for a in re.split(r"\s+and\s+", author_field, flags=re.I) if a.strip()]
     norm = []
     for p in parts:
+        p = de_latex(p)
         # "Last, First" -> "First Last"
         if "," in p:
             last, first = [x.strip() for x in p.split(",", 1)]
@@ -37,8 +46,8 @@ def split_authors(author_field: str):
 def fmt_authors(authors):
     out = []
     for a in authors:
-        a_clean = html.escape(a)
-        a_clean = de_latex(a_clean)
+        a_clean = de_latex(a)
+        a_clean = html.escape(a_clean)
         # evidenzia il tuo nome
         if HIGHLIGHT_AUTHOR and HIGHLIGHT_AUTHOR.lower() in a.lower():
             out.append(f"<strong>{a_clean}</strong>")
@@ -58,8 +67,8 @@ def pick(entr, *keys):
 def entry_to_html(e):
     # campi tipici
     year = pick(e, "year")
-    title = pick(e, "title")
-    journal = pick(e, "journal", "booktitle")
+    title = de_latex(pick(e, "title"))
+    journal = de_latex(pick(e, "journal", "booktitle"))
     authors = split_authors(pick(e, "author")) if "author" in e else []
     doi = pick(e, "doi")
     url = pick(e, "url")
@@ -87,11 +96,6 @@ def entry_to_html(e):
         parts.append(' <span class="pub-links">[' + " · ".join(links) + ']</span>')
 
     return "<li>" + "".join(parts) + "</li>"
-
-def de_latex(s: str) -> str:
-    if not s: return ""
-    s = s.replace('{\^\i}', 'i')
-    return s
 
 def render_page(grouped, years_sorted):
     # Se esiste un template, usa {{TITLE}} e {{LIST}}
