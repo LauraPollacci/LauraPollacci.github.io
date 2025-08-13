@@ -4,6 +4,7 @@
 import os, sys, html, re, pathlib
 from collections import defaultdict
 
+HIGHLIGHT_AUTHOR = os.environ.get("HIGHLIGHT_AUTHOR", "Laura Pollacci")
 # ===== Config =====
 BIB_PATH = os.environ.get("BIB_PATH", "publications.bib")
 OUT_PATH = os.environ.get("OUT_PATH", "publications.html")  
