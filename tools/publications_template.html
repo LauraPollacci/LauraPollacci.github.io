@@ -1,22 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{TITLE}}</title>
-  <!-- Se usi Editorial -->
+
+  <!-- Editorial CSS (USER SITE): -->
   <link rel="stylesheet" href="/assets/css/main.css">
   <noscript><link rel="stylesheet" href="/assets/css/noscript.css"></noscript>
+
+  <!--
+  Se è un PROJECT SITE (username.github.io/repo/), usa:
+  <link rel="stylesheet" href="/repo/assets/css/main.css">
+  <noscript><link rel="stylesheet" href="/repo/assets/css/noscript.css"></noscript>
+  -->
+
+  <style>
+    /* Piccoli ritocchi per l'elenco pubblicazioni */
+    .pub-list { margin: 0 0 1.5rem 1.25rem; }
+    .pub-list li { margin: .35rem 0; }
+    .pub-authors strong { font-weight: 700; }
+    .pub-title { font-weight: 600; }
+    .pub-links a { text-decoration: none; border-bottom: 1px solid; }
+  </style>
 </head>
 <body class="is-preload">
   <div id="wrapper">
     <div id="main">
       <div class="inner">
-        <header id="header"><h1>Publications</h1></header>
+        <!-- Header: se usi il tuo breadcrumb qui, lascialo -->
+        <header id="header">
+          <h1>Publications</h1>
+        </header>
+
+        <!-- Il contenuto viene inserito qui dallo script -->
         {{LIST}}
       </div>
     </div>
-    <!-- sidebar/menu del tuo tema, se vuoi -->
+    <!-- Se usi la sidebar di Editorial, puoi includerla qui -->
   </div>
+
+  <script>
+    // Facoltativo: rimuovi la classe 'is-preload' come fa Editorial
+    window.addEventListener('load', () => document.body.classList.remove('is-preload'));
+  </script>
 </body>
 </html>
