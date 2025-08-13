@@ -87,6 +87,22 @@ def entry_to_html(e):
 
     return "<li>" + "".join(parts) + "</li>"
 
+def de_latex(s: str) -> str:
+    if not s: return ""
+    # mapping essenziale; aggiungi altri se servono
+    repl = {
+        r"{\^\i}": "î", r"\^i": "î",
+        r"\'a": "á", r"\'e": "é", r"\'i": "í", r"\'o": "ó", r"\'u": "ú",
+        r"\'A": "Á", r"\'E": "É", r"\'I": "Í", r"\'O": "Ó", r"\'U": "Ú",
+        r"\"a": "ä", r"\"e": "ë", r"\"i": "ï", r"\"o": "ö", r"\"u": "ü",
+        r"\`a": "à", r"\`e": "è", r"\`i": "ì", r"\`o": "ò", r"\`u": "ù",
+        r"\~n": "ñ", r"\c{c}": "ç",
+        r"\&": "&"
+    }
+    for k, v in repl.items():
+        s = s.replace(k, v)
+    return s
+
 def render_page(grouped, years_sorted):
     # Se esiste un template, usa {{TITLE}} e {{LIST}}
     content = []
