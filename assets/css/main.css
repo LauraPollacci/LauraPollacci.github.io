@@ -1210,7 +1210,7 @@ input[type="radio"] + label:before {
     border-radius: 0;
     padding: 0; }
 
-/* Icon */
+/* Icon
 .icon {
   text-decoration: none;
   border-bottom: none;
@@ -1233,7 +1233,31 @@ input[type="radio"] + label:before {
   .icon.solid:before {
     font-weight: 900; }
   .icon.brands:before {
-    font-family: 'Font Awesome  Brands'; }
+    font-family: 'Font Awesome  Brands'; } */
+
+  /* Icon – compat con Font Awesome 5 (file fontawesome-all.min.css) */
+.icon {
+  text-decoration: none;
+  border-bottom: none;
+  position: relative;
+}
+.icon > .label { display: none; }
+.icon:before {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 400;
+}
+.icon.solid:before { font-weight: 700; }
+.icon.brands:before { font-family: "Font Awesome 5 Brands"; }
+
+#sidebar .contact + .icons { display:flex; justify-content:center; gap:.75rem; }
+#sidebar .contact + .icons .icon:before { font-size:1.5rem; }
 
 /* Image */
 .image {
@@ -1982,8 +2006,8 @@ button,
     width: 26em; }
     #sidebar > .inner > * {
       border-bottom: solid 2px rgba(210, 215, 217, 0.75);
-      margin: 0 0 3.5em 0;
-      padding: 0 0 3.5em 0; }
+      margin: 0 0 1.5em 0;
+      padding: 0 0 1.5em 0; }
       #sidebar > .inner > * > :last-child {
         margin-bottom: 0; }
       #sidebar > .inner > *:last-child {
