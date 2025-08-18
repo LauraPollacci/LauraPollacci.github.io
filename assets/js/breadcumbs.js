@@ -1,91 +1,134 @@
-/*
-	By Laura Pollacci
-*/
-
-/* Per "project site", attivare questa riga (oppure mettere data-basepath sull'<html>):
-document.documentElement.dataset.basepath = "/nome-repo/";
-*/
-
 (function () {
-const base = document.documentElement.dataset.basepath || "/";
+  // === Basepath: user site => "/"
+  const base = "/";
 
-// === 1) MAPPA DEL SITO ===
-// Path normalizzati: sempre con / iniziale e finale ("/", "/sezione/", "/sezione/pagina/")
-const siteMap = {
-	"/": { title: "Home" },
-
-	// ESEMPI:
-	"/portfolio/":        { title: "Pagina principale", parent: "/" },
-	"/portfolio/app-x/":  { title: "Sottopagina",       parent: "/portfolio/" },
-	"/about/":            { title: "Chi sono", parent: "/" },
-	"/contatti/":         { title: "Contatti", parent: "/" }
+  // === Mini mappa: solo i padri che vuoi vedere (etichette "umane")
+  const siteMap = {
+  "/":               { title: "Home" },
+  "/publications/":  { title: "Publications", parent: "/" },
+  "/teaching/":      { title: "Teaching",     parent: "/" },
+  "/research/":      { title: "Research",     parent: "/" },
+  "/about/":         { title: "About",        parent: "/" },
+  "/txa/":           { title: "TXA",          parent: "/" }
 };
+  // === Utils
+  function normalizePath(p) {
+  let out = p.replace(/[?#].*$/, "");              // togli query/hash
 
-// === 2) COSTRUZIONE BREADCRUMB ===
-const hostBase = (function () {
-	// unisce basepath e path assoluto del sito
-	return function join(path) {
-	// path è tipo "/qualcosa/"
-	if (base === "/") return path;
-	return base.replace(/\/$/, "") + path; // "/repo" + "/x/" => "/repo/x/"
-	};
-})();
+  // /index.html -> /
+  out = out.replace(/\/index\.html?$/i, "/");
 
-function normalizePath(pathname) {
-	let p = pathname;
-	if (base !== "/" && p.startsWith(base)) p = p.slice(base.length - 1);
-	p = p.replace(/index\.html?$/i, "");
-	if (p === "" || p === "/") return "/";
-	if (!p.endsWith("/")) p += "/";
-	if (!p.startsWith("/")) p = "/" + p;
-	return p;
+  // se non è la home, togli estensione .html/.htm (es. /research.html -> /research)
+  if (out !== "/") out = out.replace(/\.html?$/i, "");
+
+  if (out === "" || out === "/") return "/";       // home
+  if (!out.endsWith("/")) out += "/";              // assicurati dello slash finale
+  if (!out.startsWith("/")) out = "/" + out;       // e dello slash iniziale
+  return out;
 }
+  function cleanTitle(t) {
+    t = t || "";
+    // rimuovi prefisso "LP | " o "LP - "
+    t = t.replace(/^\s*LP\s*[\|\-–]\s*/i, "");
+    // se restano separatori, prendi la prima parte
+    t = t.split(/\s+[|\-–]\s+/)[0];
+    return t.trim();
+  }
+  function currentPageTitle() {
+  // 1) prova prima il titolo dichiarato sull'header
+  const headerWithTitle =
+    document.querySelector('#main header[title], .inner header[title], header.main[title], header.major[title], header[title]');
+  if (headerWithTitle) {
+    const t = headerWithTitle.getAttribute('title');
+    if (t && t.trim()) return t.trim();
+  }
 
-const el = document.getElementById("breadcrumbs");
-if (!el) return;
+//   // 2) fallback: H1 della pagina
+//   const h1 = document.querySelector('#main h1, .inner h1, header.main h1, h1');
+//   if (h1 && h1.textContent.trim()) return h1.textContent.trim();
 
-const current = normalizePath(location.pathname);
-
-// Se la pagina non è in siteMap, usa <title> come fallback e mette genitore Home
-const startNode = siteMap[current] || { title: (document.title || ""), parent: "/" };
-
-// Risali ai genitori finché esistono
-const chain = [];
-let node = startNode, cursor = current;
-while (node) {
-	chain.push({ path: cursor, title: node.title });
-	if (!node.parent) break;
-	cursor = node.parent;
-	node = siteMap[cursor];
+  // 3) fallback finale: <title> ripulito (toglie il prefisso “LP | ”)
+  return cleanTitle(document.title || "");
 }
+  function hostJoin(path) { return path; } // user site: nessun basepath da aggiungere
 
-// Assicura che Home sia in testa
-if (!chain.some(c => c.path === "/") && siteMap["/"]) {
-	chain.push({ path: "/", title: siteMap["/"].title });
-}
-chain.reverse();
+  const el = document.getElementById("breadcrumbs");
+  if (!el) return;
 
-// Caso Home: mostra solo "Home"
-if (current === "/") {
-	el.innerHTML = '<ol><li aria-current="page">' + (siteMap["/"]?.title || "Home") + '</li></ol>';
-	return;
-}
+  const current = normalizePath(location.pathname);
 
-// Render HTML
-const ol = document.createElement("ol");
-chain.forEach((c, i) => {
-	const li = document.createElement("li");
-	const last = i === chain.length - 1;
-	if (last) {
-	li.textContent = c.title;
-	li.setAttribute("aria-current", "page");
-	} else {
-	const a = document.createElement("a");
-	a.href = hostBase(c.path);
-	a.textContent = c.title;
-	li.appendChild(a);
-	}
-	ol.appendChild(li);
-});
-el.appendChild(ol);
+  // (Opzionale per-pagina) consenti di dichiarare il parent via meta:
+  // <meta name="breadcrumb-parent" content="/teaching/">
+  const metaParent = (document.querySelector('meta[name="breadcrumb-parent"]')?.content || "").trim();
+  const pageNode = siteMap[current] || {};
+  if (!pageNode.parent && metaParent) {
+    pageNode.parent = normalizePath(metaParent);
+  }
+
+  // Home: mostra solo "Home"
+  if (current === "/") {
+    el.innerHTML = '<ol><li aria-current="page">' + (siteMap["/"]?.title || "Home") + '</li></ol>';
+    return;
+  }
+
+  // Costruisci catena: usa parent dichiarati (mappa o meta). Se manca, salta a Home.
+  const chainPaths = [];
+  chainPaths.push(current);
+
+  let cur = current;
+  while (true) {
+    const node = (cur === current) ? pageNode : siteMap[cur];
+    if (node && node.parent) {
+      cur = normalizePath(node.parent);
+      chainPaths.push(cur);
+      if (cur === "/") break;
+    } else {
+      if (cur !== "/") chainPaths.push("/");
+      break;
+    }
+  }
+  chainPaths.reverse();
+
+  function titleFor(path) {
+    if (siteMap[path] && siteMap[path].title) return siteMap[path].title;
+    if (path === "/") return "Home";
+    if (path === current) return currentPageTitle();
+    // parent non mappati non dovrebbero comparire; fallback:
+    return "";
+  }
+
+  // Render
+  const ol = document.createElement("ol");
+  chainPaths.forEach((p, i) => {
+    const li = document.createElement("li");
+    const last = i === chainPaths.length - 1;
+    const t = titleFor(p) || p;
+    if (last) {
+      li.textContent = t;
+      li.setAttribute("aria-current", "page");
+    } else {
+      const a = document.createElement("a");
+      a.href = hostJoin(p);
+      a.textContent = t;
+      li.appendChild(a);
+    }
+    ol.appendChild(li);
+  });
+  el.innerHTML = "";
+  el.appendChild(ol);
+
+  // JSON-LD (facoltativo)
+  try {
+    const items = chainPaths.map((p, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": titleFor(p),
+      ...(i < chainPaths.length - 1 ? { "item": location.origin + hostJoin(p) } : {})
+    }));
+    const ld = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items };
+    const s = document.createElement("script");
+    s.type = "application/ld+json";
+    s.text = JSON.stringify(ld);
+    document.head.appendChild(s);
+  } catch (e) {}
 })();
