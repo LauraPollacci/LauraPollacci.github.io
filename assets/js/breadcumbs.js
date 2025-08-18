@@ -26,30 +26,41 @@
   if (!out.startsWith("/")) out = "/" + out;       // e dello slash iniziale
   return out;
 }
-  function cleanTitle(t) {
-    t = t || "";
-    // rimuovi prefisso "LP | " o "LP - "
-    t = t.replace(/^\s*LP\s*[\|\-–]\s*/i, "");
-    // se restano separatori, prendi la prima parte
-    t = t.split(/\s+[|\-–]\s+/)[0];
-    return t.trim();
-  }
-  function currentPageTitle() {
-  // 1) prova prima il titolo dichiarato sull'header
-  const headerWithTitle =
-    document.querySelector('#main header[title], .inner header[title], header.main[title], header.major[title], header[title]');
+  
+function cleanTitle(t) {
+  t = t || "";
+  // rimuovi prefisso "LP | " o "LP -/–/— "
+  t = t.replace(/^\s*LP\s*[\|\-–—]\s*/i, "");
+  // se c'è un suffisso tipo " | Site" o " — Site", tieni solo la prima parte
+  t = t.split(/\s+[|\-–—]\s+/)[0];
+  return t.trim();
+}
+
+  
+function currentPageTitle() {
+  const tidy = s => cleanTitle((s || "").trim());
+
+  // 1) usa SEMPRE <head><title>…</title>
+  if (document.title && document.title.trim()) return tidy(document.title);
+
+  // 2) fallback (se proprio manca <title>): header[title]
+  const headerWithTitle = document.querySelector(
+    '#main header[title], .inner header[title], header.main[title], header.major[title], header[title]'
+  );
   if (headerWithTitle) {
     const t = headerWithTitle.getAttribute('title');
-    if (t && t.trim()) return t.trim();
+    if (t && t.trim()) return tidy(t);
   }
 
-//   // 2) fallback: H1 della pagina
-//   const h1 = document.querySelector('#main h1, .inner h1, header.main h1, h1');
-//   if (h1 && h1.textContent.trim()) return h1.textContent.trim();
+  // 3) fallback finale: H1
+  const h1 = document.querySelector('#main h1, .inner h1, header.main h1, h1');
+  if (h1 && h1.textContent.trim()) return tidy(h1.textContent);
 
-  // 3) fallback finale: <title> ripulito (toglie il prefisso “LP | ”)
-  return cleanTitle(document.title || "");
+  return "Untitled";
 }
+
+
+
   function hostJoin(path) { return path; } // user site: nessun basepath da aggiungere
 
   const el = document.getElementById("breadcrumbs");
