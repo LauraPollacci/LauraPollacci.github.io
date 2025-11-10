@@ -9,7 +9,7 @@ HIGHLIGHT_AUTHOR = os.environ.get("HIGHLIGHT_AUTHOR", "Laura Pollacci")
 BIB_PATH = os.environ.get("BIB_PATH", "publications.bib")
 OUT_PATH = os.environ.get("OUT_PATH", "publications.html")
 TITLE    = os.environ.get("PAGE_TITLE", "Publications")
-TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "tools/publications_template.html")
+TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", "publications_template.html")
 
 # ===== Dipendenze minime (bibtexparser) =====
 try:
